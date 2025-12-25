@@ -4,7 +4,7 @@
   "version": "1.5.0",
   "minAppVersion": "1.5.0",
   "description": "Callout-based multi-column layouts with quick insert templates.",
-  "author": "Codex",
+  "author": "zheyuan (Max) Kong",
   "authorUrl": "",
   "isDesktopOnly": false
 }
