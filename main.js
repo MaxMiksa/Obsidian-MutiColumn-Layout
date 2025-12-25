@@ -1,23 +1,85 @@
-const { Plugin, Menu, MarkdownView, PluginSettingTab, Setting, Modal } = require("obsidian");
+const { Plugin, Menu, MarkdownView, PluginSettingTab, Setting, Modal, Notice } = require("obsidian");
 
 const DEFAULT_SETTINGS = {
+  language: "en",
   dividerWidth: "1px",
   dividerStyle: "solid",
-  dividerColor: "#7d7d7d", // Default to a visible gray instead of var for better picker UX
+  dividerColor: "gray",
   horzDivider: false,
   horzDividerWidth: "1px",
   horzDividerStyle: "solid",
-  horzDividerColor: "#7d7d7d"
+  horzDividerColor: "gray"
+};
+
+const PRESET_COLORS = {
+  "gray": "#7d7d7d",
+  "red": "#e93030",
+  "orange": "#e9973f",
+  "yellow": "#e0de71",
+  "green": "#44cf6e",
+  "cyan": "#53dfdd",
+  "blue": "#3875d7",
+  "purple": "#945ecf",
+  "black": "#000000",
+  "white": "#ffffff"
+};
+
+const TEXTS = {
+  en: {
+    "settings.title": "Multi-Column Layout Settings",
+    "settings.general": "General",
+    "settings.language": "Language",
+    "settings.language.desc": "Choose the display language for the plugin.",
+    "settings.vertical": "Vertical Dividers (Bordered)",
+    "settings.horizontal": "Horizontal Dividers",
+    "settings.width": "Width",
+    "settings.width.desc": "Width of the line (e.g., 1px, 2px).",
+    "settings.style": "Style",
+    "settings.style.desc": "Style of the line.",
+    "settings.color": "Color",
+    "settings.color.desc": "Color of the line.",
+    "settings.horz.enable": "Enable Horizontal Dividers",
+    "settings.horz.enable.desc": "Automatically add top and bottom borders to NEW inserted layouts.",
+    "menu.2col": "2 Columns + Divider",
+    "menu.3col": "3 Columns + Divider",
+    "menu.custom": "Custom Layout...",
+    "modal.title": "Custom Column Ratios",
+    "modal.instruction": "Enter ratios separated by slashes (e.g. 30/70 or 20/30/50). Sum must be 100.",
+    "modal.insert": "Insert Layout",
+    "modal.error.format": "Invalid format. Use numbers separated by /.",
+    "modal.error.sum": "Sum is {0}%, but must be 100%."
+  },
+  zh: {
+    "settings.title": "多栏布局设置",
+    "settings.general": "常规",
+    "settings.language": "语言",
+    "settings.language.desc": "选择插件显示的语言。",
+    "settings.vertical": "竖直分割线",
+    "settings.horizontal": "水平分割线",
+    "settings.width": "宽度",
+    "settings.width.desc": "线条的粗细（例如 1px, 2px）。",
+    "settings.style": "样式",
+    "settings.style.desc": "线条的类型。",
+    "settings.color": "颜色",
+    "settings.color.desc": "线条的颜色。",
+    "settings.horz.enable": "启用水平分割线",
+    "settings.horz.enable.desc": "在插入新布局时自动添加上下边框。",
+    "menu.2col": "2栏 + 分割线",
+    "menu.3col": "3栏 + 分割线",
+    "menu.custom": "自定义布局...",
+    "modal.title": "自定义分栏比例",
+    "modal.instruction": "输入以斜杠分隔的比例（例如 30/70 或 20/30/50）。总和必须为 100。",
+    "modal.insert": "插入布局",
+    "modal.error.format": "格式无效。请使用斜杠分隔数字。",
+    "modal.error.sum": "当前总和为 {0}%，但必须是 100%。"
+  }
 };
 
 class MultiColumnLayoutPlugin extends Plugin {
   async onload() {
     await this.loadSettings();
 
-    // Add Settings Tab
     this.addSettingTab(new MultiColumnLayoutSettingTab(this.app, this));
-
-    // Apply CSS Variables
     this.applySettingsStyles();
 
     this.registerEvent(
@@ -31,6 +93,15 @@ class MultiColumnLayoutPlugin extends Plugin {
     });
   }
 
+  t(key, ...args) {
+    const lang = this.settings.language || "en";
+    let str = TEXTS[lang][key] || TEXTS["en" у][key] || key;
+    args.forEach((arg, i) => {
+      str = str.replace(`{${i}}`, arg);
+    });
+    return str;
+  }
+
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
@@ -41,26 +112,29 @@ class MultiColumnLayoutPlugin extends Plugin {
   }
 
   applySettingsStyles() {
-    // Inject settings into CSS variables on the body
     const style = document.body.style;
+    
+    const vColor = PRESET_COLORS[this.settings.dividerColor] || this.settings.dividerColor;
+    const hColor = PRESET_COLORS[this.settings.horzDividerColor] || this.settings.horzDividerColor;
+
     style.setProperty("--mcl-divider-width", this.settings.dividerWidth);
     style.setProperty("--mcl-divider-style", this.settings.dividerStyle);
-    style.setProperty("--mcl-divider-color", this.settings.dividerColor);
+    style.setProperty("--mcl-divider-color", vColor);
     
     style.setProperty("--mcl-horz-divider-width", this.settings.horzDividerWidth);
     style.setProperty("--mcl-horz-divider-style", this.settings.horzDividerStyle);
-    style.setProperty("--mcl-horz-divider-color", this.settings.horzDividerColor);
+    style.setProperty("--mcl-horz-divider-color", hColor);
   }
 
   addInsertMenu(menu, editor) {
     menu.addItem((item) => {
-      item.setTitle("2 Columns + Divider");
+      item.setTitle(this.t("menu.2col"));
       item.setIcon("columns");
       item.onClick(() => this.safeInsert(editor, 2, [50, 50], "bordered"));
     });
 
     menu.addItem((item) => {
-      item.setTitle("3 Columns + Divider");
+      item.setTitle(this.t("menu.3col"));
       item.setIcon("columns");
       item.onClick(() => this.safeInsert(editor, 3, [33, 34, 33], "bordered"));
     });
@@ -68,12 +142,12 @@ class MultiColumnLayoutPlugin extends Plugin {
     menu.addSeparator();
 
     menu.addItem((item) => {
-      item.setTitle("Custom Layout...");
+      item.setTitle(this.t("menu.custom"));
       item.setIcon("settings-sliders");
       item.onClick(() => {
         const activeEditor = this.getActiveEditor() || editor;
         if(activeEditor) {
-            new CustomRatioModal(this.app, (cols, ratios) => {
+            new CustomRatioModal(this.app, this, (cols, ratios) => {
                 this.insertColumnLayout(activeEditor, cols, ratios, "bordered");
             }).open();
         }
@@ -100,7 +174,6 @@ class MultiColumnLayoutPlugin extends Plugin {
 
     editor.focus();
 
-    // Check if horizontal dividers are enabled in settings
     const metaParts = [];
     if (metadata) metaParts.push(metadata);
     if (this.settings.horzDivider) metaParts.push("horizontal");
@@ -115,9 +188,7 @@ class MultiColumnLayoutPlugin extends Plugin {
       const ratio = Array.isArray(ratios) ? ratios[i] : undefined;
       const colMeta = typeof ratio === "number" && !isNaN(ratio) ? `|${ratio}` : "";
       lines.push(`>> [!col${colMeta}]`);
-      lines.push(">> ");
-      
-      // Only add spacer line if it's NOT the last column
+      lines.push(">>");
       if (i < columnCount - 1) {
         lines.push(">");
       }
@@ -150,16 +221,17 @@ class MultiColumnLayoutPlugin extends Plugin {
 }
 
 class CustomRatioModal extends Modal {
-    constructor(app, onSubmit) {
+    constructor(app, plugin, onSubmit) {
         super(app);
+        this.plugin = plugin;
         this.onSubmit = onSubmit;
     }
 
     onOpen() {
         const { contentEl } = this;
-        contentEl.createEl("h2", { text: "Custom Column Ratios" });
+        contentEl.createEl("h2", { text: this.plugin.t("modal.title") });
 
-        const instruction = contentEl.createEl("p", { text: "Enter ratios separated by slashes (e.g. 30/70 or 20/30/50). Sum must be 100." });
+        const instruction = contentEl.createEl("p", { text: this.plugin.t("modal.instruction") });
         instruction.style.color = "var(--text-muted)";
         instruction.style.marginBottom = "1rem";
 
@@ -178,7 +250,7 @@ class CustomRatioModal extends Modal {
         btnContainer.style.display = "flex";
         btnContainer.style.justifyContent = "flex-end";
 
-        const submitBtn = btnContainer.createEl("button", { text: "Insert Layout" });
+        const submitBtn = btnContainer.createEl("button", { text: this.plugin.t("modal.insert") });
         submitBtn.addClass("mod-cta");
 
         const validateAndSubmit = () => {
@@ -189,13 +261,13 @@ class CustomRatioModal extends Modal {
             const sum = parts.reduce((a, b) => a + (isNaN(b) ? 0 : b), 0);
 
             if (parts.some(isNaN)) {
-                errorMsg.text = "Invalid format. Use numbers separated by /.";
+                errorMsg.text = this.plugin.t("modal.error.format");
                 errorMsg.style.display = "block";
                 return;
             }
 
             if (sum !== 100) {
-                errorMsg.text = `Sum is ${sum}%, but must be 100%.`;
+                errorMsg.text = this.plugin.t("modal.error.sum", sum);
                 errorMsg.style.display = "block";
                 return;
             }
@@ -226,11 +298,26 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "Multi-Column Layout Settings" });
+    containerEl.createEl("h2", { text: this.plugin.t("settings.title") });
 
     new Setting(containerEl)
-        .setName("Vertical Divider Width")
-        .setDesc("Width of the divider between columns.")
+        .setName(this.plugin.t("settings.language"))
+        .setDesc(this.plugin.t("settings.language.desc"))
+        .addDropdown(dropdown => dropdown
+            .addOption("en", "English")
+            .addOption("zh", "简体中文")
+            .setValue(this.plugin.settings.language)
+            .onChange(async (value) => {
+                this.plugin.settings.language = value;
+                await this.plugin.saveSettings();
+                this.display(); // Refresh settings tab to show new language
+            }));
+
+    containerEl.createEl("h3", { text: this.plugin.t("settings.vertical") });
+
+    new Setting(containerEl)
+        .setName(this.plugin.t("settings.width"))
+        .setDesc(this.plugin.t("settings.width.desc"))
         .addText(text => text
             .setPlaceholder("1px")
             .setValue(this.plugin.settings.dividerWidth)
@@ -240,8 +327,8 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
             }));
 
     new Setting(containerEl)
-        .setName("Vertical Divider Style")
-        .setDesc("Style of the divider line.")
+        .setName(this.plugin.t("settings.style"))
+        .setDesc(this.plugin.t("settings.style.desc"))
         .addDropdown(dropdown => dropdown
             .addOption("solid", "Solid")
             .addOption("dashed", "Dashed")
@@ -253,21 +340,13 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
                 await this.plugin.saveSettings();
             }));
 
-    new Setting(containerEl)
-        .setName("Vertical Divider Color")
-        .setDesc("Color of the divider.")
-        .addColorPicker(color => color
-            .setValue(this.plugin.settings.dividerColor)
-            .onChange(async (value) => {
-                this.plugin.settings.dividerColor = value;
-                await this.plugin.saveSettings();
-            }));
+    this.addColorDropdown(containerEl, "dividerColor", this.plugin.t("settings.color"), this.plugin.t("settings.color.desc"));
 
-    containerEl.createEl("h3", { text: "Horizontal Dividers" });
+    containerEl.createEl("h3", { text: this.plugin.t("settings.horizontal") });
 
     new Setting(containerEl)
-        .setName("Add Horizontal Dividers")
-        .setDesc("Automatically add top and bottom borders to NEW inserted layouts.")
+        .setName(this.plugin.t("settings.horz.enable"))
+        .setDesc(this.plugin.t("settings.horz.enable.desc"))
         .addToggle(toggle => toggle
             .setValue(this.plugin.settings.horzDivider)
             .onChange(async (value) => {
@@ -276,7 +355,7 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
             }));
 
     new Setting(containerEl)
-        .setName("Horizontal Divider Width")
+        .setName(this.plugin.t("settings.width"))
         .addText(text => text
             .setPlaceholder("1px")
             .setValue(this.plugin.settings.horzDividerWidth)
@@ -286,7 +365,7 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
             }));
             
     new Setting(containerEl)
-        .setName("Horizontal Divider Style")
+        .setName(this.plugin.t("settings.style"))
         .addDropdown(dropdown => dropdown
             .addOption("solid", "Solid")
             .addOption("dashed", "Dashed")
@@ -298,14 +377,23 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
                 await this.plugin.saveSettings();
             }));
             
-    new Setting(containerEl)
-        .setName("Horizontal Divider Color")
-        .addColorPicker(color => color
-            .setValue(this.plugin.settings.horzDividerColor)
-            .onChange(async (value) => {
-                this.plugin.settings.horzDividerColor = value;
+    this.addColorDropdown(containerEl, "horzDividerColor", this.plugin.t("settings.color"), "");
+  }
+
+  addColorDropdown(containerEl, settingKey, name, desc) {
+      new Setting(containerEl)
+        .setName(name)
+        .setDesc(desc)
+        .addDropdown(dropdown => {
+            Object.keys(PRESET_COLORS).forEach(color => {
+                dropdown.addOption(color, color.charAt(0).toUpperCase() + color.slice(1));
+            });
+            dropdown.setValue(this.plugin.settings[settingKey]);
+            dropdown.onChange(async (value) => {
+                this.plugin.settings[settingKey] = value;
                 await this.plugin.saveSettings();
-            }));
+            });
+        });
   }
 }
 
