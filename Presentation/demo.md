@@ -1,4 +1,6 @@
 # Multi-Column Showcase
+
+## 3 Columns (33/34/33)
 > [!multi-column]
 >
 >> [!col|33]
@@ -17,7 +19,7 @@
 >> - Highlight: CSS snippet works standalone.
 
 ---
-
+## Siderbar Left (30/70)
 > [!multi-column]
 >
 >> [!col|30]
@@ -27,22 +29,49 @@
 >
 >> [!col|70]
 >> ## Mode E: Main Content
->> - Large content area for prose/charts.
->> - Pair with the sidebar for focus.
+>> - Large content area for prose/charts. Large content area for prose/charts. Large content area for prose/charts.
+>> - Pair with the sidebar for focus. Pair with the sidebar for focus. Pair with the sidebar for focus. Pair with the sidebar for focus.
 
 ---
-
+## 2 Columns (50/50)
 > [!multi-column]
 >
 >> [!col]
 >> ## Mode F: Three-Column Equal
 >> - Default equal widths, no ratios needed.
->> - Great for comparisons or card layouts.
+>> - Great for comparisons or card layouts.  Great for comparisons or card layouts.  Great for comparisons or card layouts.  Great for comparisons or card layouts.
 >
 >> [!col]
 >> ## Mode G: Equal Column
 >> - Add screenshots or checklists.
+
+---
+## Rich Content Demo (Mixed Media)
+> [!multi-column]
 >
->> [!col]
->> ## Mode H: Equal Column
->> - Extend with more items as needed.
+>> [!col|45]
+>> ## Rich Markdown
+>> - **Bold**, *italic*, and `inline code`.
+>> - Task list:
+>>   - [ ] Write spec
+>>   - [x] Style columns
+>> - Table:
+>>   | Feature | Status |
+>>   | --- | --- |
+>>   | Tables | ✅ |
+>>   | Images | ✅ |
+>> - Link: [Obsidian](https://obsidian.md)
+>
+>> [!col|55]
+>> ## Media & Nested Blocks
+>> ![Placeholder image](https://via.placeholder.com/320x120)
+>> ```js
+>> // Code block inside column
+>> const cols = [33, 34, 33];
+>> console.log('Supports code blocks', cols);
+>> ```
+>> > Blockquote to show nested text.
+>> > Can span multiple lines without breaking layout.
+>> >
+>> >> [!col]
+>> >> Nested callout to illustrate embedding.
