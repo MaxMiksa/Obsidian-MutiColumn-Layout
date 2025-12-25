@@ -3,11 +3,11 @@ const { Plugin, Menu, MarkdownView, PluginSettingTab, Setting, Modal } = require
 const DEFAULT_SETTINGS = {
   dividerWidth: "1px",
   dividerStyle: "solid",
-  dividerColor: "var(--background-modifier-border)",
+  dividerColor: "#7d7d7d", // Default to a visible gray instead of var for better picker UX
   horzDivider: false,
   horzDividerWidth: "1px",
   horzDividerStyle: "solid",
-  horzDividerColor: "var(--background-modifier-border)"
+  horzDividerColor: "#7d7d7d"
 };
 
 class MultiColumnLayoutPlugin extends Plugin {
@@ -115,8 +115,10 @@ class MultiColumnLayoutPlugin extends Plugin {
       const ratio = Array.isArray(ratios) ? ratios[i] : undefined;
       const colMeta = typeof ratio === "number" && !isNaN(ratio) ? `|${ratio}` : "";
       lines.push(`>> [!col${colMeta}]`);
-      lines.push(">>");
-      if (i !== columnCount - 1) {
+      lines.push(">> ");
+      
+      // Only add spacer line if it's NOT the last column
+      if (i < columnCount - 1) {
         lines.push(">");
       }
     }
@@ -157,8 +159,7 @@ class CustomRatioModal extends Modal {
         const { contentEl } = this;
         contentEl.createEl("h2", { text: "Custom Column Ratios" });
 
-        const instruction = contentEl.createEl("p", { text: "Enter ratios separated by slashes (e.g. 30/70 or 20/30/50). Sum must be 100."
-        });
+        const instruction = contentEl.createEl("p", { text: "Enter ratios separated by slashes (e.g. 30/70 or 20/30/50). Sum must be 100." });
         instruction.style.color = "var(--text-muted)";
         instruction.style.marginBottom = "1rem";
 
@@ -229,7 +230,7 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
         .setName("Vertical Divider Width")
-        .setDesc("Width of the divider between columns (e.g., 1px, 2px).")
+        .setDesc("Width of the divider between columns.")
         .addText(text => text
             .setPlaceholder("1px")
             .setValue(this.plugin.settings.dividerWidth)
@@ -254,9 +255,8 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
         .setName("Vertical Divider Color")
-        .setDesc("Color of the divider (CSS color value or variable).")
-        .addText(text => text
-            .setPlaceholder("var(--background-modifier-border)")
+        .setDesc("Color of the divider.")
+        .addColorPicker(color => color
             .setValue(this.plugin.settings.dividerColor)
             .onChange(async (value) => {
                 this.plugin.settings.dividerColor = value;
@@ -267,7 +267,7 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
         .setName("Add Horizontal Dividers")
-        .setDesc("Automatically add top and bottom borders to inserted layouts.")
+        .setDesc("Automatically add top and bottom borders to NEW inserted layouts.")
         .addToggle(toggle => toggle
             .setValue(this.plugin.settings.horzDivider)
             .onChange(async (value) => {
@@ -300,8 +300,7 @@ class MultiColumnLayoutSettingTab extends PluginSettingTab {
             
     new Setting(containerEl)
         .setName("Horizontal Divider Color")
-        .addText(text => text
-            .setPlaceholder("var(--background-modifier-border)")
+        .addColorPicker(color => color
             .setValue(this.plugin.settings.horzDividerColor)
             .onChange(async (value) => {
                 this.plugin.settings.horzDividerColor = value;
