@@ -72,6 +72,15 @@
 >>   | Tables | ✅ |
 >>   | Images | ✅ |
 >> - Link: [Obsidian](https://obsidian.md)
+>> - Mermaid Diagram:
+>> ```mermaid
+>> graph LR
+>> A[Start] --> B(Process)
+>> B --> C{Decision}
+>> C -->|Yes| D[Result]
+>> ```
+>> - LaTeX Equation:
+>> $$ e^{i\pi} + 1 = 0 $$
 >
 >> [!col|55]
 >> ## Media & Nested Blocks
