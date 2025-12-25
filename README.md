@@ -25,6 +25,36 @@ Multi-Column Layout is an Obsidian plugin that simplifies the creation of side-b
 3. Select your desired layout.
 4. Start typing your content inside the generated blocks!
 
+## 📝 Syntax Guide
+
+The syntax is designed to be simple and intuitive if you prefer typing it manually:
+
+- **Container**: Use `> [!multi-column]` to create the wrapper.
+- **Column**: Use `>> [!col]` nested inside to create columns.
+- **Widths**: Add a pipe and number to define width percentage, e.g., `>> [!col|30]`.
+
+```markdown
+> [!multi-column]
+>
+>> [!col]
+>> This is the left column.
+>
+>> [!col]
+>> This is the right column.
+```
+
+Or with custom widths (e.g., 30% / 70%):
+
+```markdown
+> [!multi-column]
+>
+>> [!col|30]
+>> Left sidebar content...
+>
+>> [!col|70]
+>> Main content area...
+```
+
 ---
 
 <details>
