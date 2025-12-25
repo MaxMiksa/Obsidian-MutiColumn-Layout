@@ -22,26 +22,17 @@ class MultiColumnLayoutPlugin extends Plugin {
 
       subMenu.addItem((subItem) => {
         subItem.setTitle("2 Columns (50/50)");
-        subItem.onClick(() => {
-          const activeEditor = this.getActiveEditor() || editor;
-          this.insertColumnLayout(activeEditor, 2);
-        });
+        subItem.onClick(() => this.safeInsert(editor, 2));
       });
 
       subMenu.addItem((subItem) => {
         subItem.setTitle("Sidebar Left (30/70)");
-        subItem.onClick(() => {
-          const activeEditor = this.getActiveEditor() || editor;
-          this.insertColumnLayout(activeEditor, 2, [30, 70]);
-        });
+        subItem.onClick(() => this.safeInsert(editor, 2, [30, 70]));
       });
 
       subMenu.addItem((subItem) => {
         subItem.setTitle("3 Columns (33/34/33)");
-        subItem.onClick(() => {
-          const activeEditor = this.getActiveEditor() || editor;
-          this.insertColumnLayout(activeEditor, 3, [33, 34, 33]);
-        });
+        subItem.onClick(() => this.safeInsert(editor, 3, [33, 34, 33]));
       });
 
       subMenu.addSeparator();
@@ -49,28 +40,38 @@ class MultiColumnLayoutPlugin extends Plugin {
       subMenu.addItem((subItem) => {
         subItem.setTitle("2 Columns + Divider");
         subItem.setIcon("columns");
-        subItem.onClick(() => {
-          const activeEditor = this.getActiveEditor() || editor;
-          this.insertColumnLayout(activeEditor, 2, undefined, "bordered");
-        });
+        subItem.onClick(() => this.safeInsert(editor, 2, undefined, "bordered"));
       });
 
       subMenu.addItem((subItem) => {
         subItem.setTitle("3 Columns + Divider");
         subItem.setIcon("columns");
-        subItem.onClick(() => {
-          const activeEditor = this.getActiveEditor() || editor;
-          this.insertColumnLayout(activeEditor, 3, [33, 34, 33], "bordered");
-        });
+        subItem.onClick(() => this.safeInsert(editor, 3, [33, 34, 33], "bordered"));
       });
     });
   }
 
-  insertColumnLayout(editor, columnCount, ratios, metadata = "") {
-    if (!editor) return;
+  // Wrapper to safely handle editor resolution
+  safeInsert(passedEditor, cols, ratios, meta) {
+    // Try to get the editor from the active view first, as it's most reliable
+    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    const activeEditor = view ? view.editor : passedEditor;
 
-    // Ensure editor is focused
-    editor.focus();
+    if (!activeEditor) {
+      console.error("Multi-Column Plugin: No active editor found.");
+      return;
+    }
+
+    this.insertColumnLayout(activeEditor, cols, ratios, meta);
+  }
+
+  insertColumnLayout(editor, columnCount, ratios, metadata = "") {
+    if (!editor) {
+      console.log("Multi-Column Plugin: Editor instance is null/undefined");
+      return;
+    }
+
+    console.log(`Multi-Column Plugin: Inserting ${columnCount} columns...`);
 
     const lines = [];
     const metaStr = metadata ? `|${metadata}` : "";
@@ -88,13 +89,18 @@ class MultiColumnLayoutPlugin extends Plugin {
     }
 
     const block = lines.join("\n") + "\n";
-    const cursor = editor.getCursor();
     
-    editor.replaceSelection(block);
-
-    // Move cursor to the first column content line (after >> )
-    const target = { line: cursor.line + 3, ch: 3 };
-    editor.setCursor(target);
+    try {
+        const cursor = editor.getCursor();
+        editor.replaceSelection(block);
+        
+        // Calculate new cursor position
+        const target = { line: cursor.line + 3, ch: 3 };
+        editor.setCursor(target);
+        editor.focus();
+    } catch (err) {
+        console.error("Multi-Column Plugin: Failed to insert text", err);
+    }
   }
 
   applyColumnWidths(el) {
