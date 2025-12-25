@@ -43,28 +43,44 @@ class MultiColumnLayoutPlugin extends Plugin {
           this.insertColumnLayout(activeEditor, 3, [33, 34, 33]);
         });
       });
+
+      subMenu.addSeparator();
+
+      subMenu.addItem((subItem) => {
+        subItem.setTitle("2 Columns + Divider");
+        subItem.setIcon("columns");
+        subItem.onClick(() => {
+          const activeEditor = this.getActiveEditor() || editor;
+          this.insertColumnLayout(activeEditor, 2, undefined, "bordered");
+        });
+      });
+
+      subMenu.addItem((subItem) => {
+        subItem.setTitle("3 Columns + Divider");
+        subItem.setIcon("columns");
+        subItem.onClick(() => {
+          const activeEditor = this.getActiveEditor() || editor;
+          this.insertColumnLayout(activeEditor, 3, [33, 34, 33], "bordered");
+        });
+      });
     });
   }
 
-  getActiveEditor() {
-    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-    return view ? view.editor : null;
-  }
-
-  insertColumnLayout(editor, columnCount, ratios) {
+  insertColumnLayout(editor, columnCount, ratios, metadata = "") {
     if (!editor) return;
 
     // Ensure editor is focused
     editor.focus();
 
     const lines = [];
-    lines.push("> [!multi-column]");
+    const metaStr = metadata ? `|${metadata}` : "";
+    lines.push(`> [!multi-column${metaStr}]`);
     lines.push(">");
 
     for (let i = 0; i < columnCount; i++) {
       const ratio = Array.isArray(ratios) ? ratios[i] : undefined;
-      const meta = typeof ratio === "number" && !isNaN(ratio) ? `|${ratio}` : "";
-      lines.push(`>> [!col${meta}]`);
+      const colMeta = typeof ratio === "number" && !isNaN(ratio) ? `|${ratio}` : "";
+      lines.push(`>> [!col${colMeta}]`);
       lines.push(">> ");
       if (i !== columnCount - 1) {
         lines.push(">");

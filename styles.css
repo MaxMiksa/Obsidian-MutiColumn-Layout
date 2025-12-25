@@ -1,4 +1,4 @@
-﻿/* Multi-Column Layout base styles */
+/* Multi-Column Layout base styles */
 .callout[data-callout="multi-column"] {
   background: transparent;
   border: none;
@@ -48,6 +48,27 @@
 .markdown-source-view.mod-cm6:not(.is-live-preview) .callout[data-callout="col"] > .callout-title {
   display: flex;
 }
+
+/* Bordered Multi-Column Variant */
+.callout[data-callout="multi-column"][data-callout-metadata*="bordered"] > .callout-content {
+  gap: 0; /* Remove gap to handle borders cleanly */
+}
+
+.callout[data-callout="multi-column"][data-callout-metadata*="bordered"] > .callout-content > .callout[data-callout="col"] {
+  border-right: 1px solid var(--background-modifier-border);
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.callout[data-callout="multi-column"][data-callout-metadata*="bordered"] > .callout-content > .callout[data-callout="col"]:first-child {
+  padding-left: 0;
+}
+
+.callout[data-callout="multi-column"][data-callout-metadata*="bordered"] > .callout-content > .callout[data-callout="col"]:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
 .callout[data-callout="col"][data-callout-metadata="1"] { flex: 0 0 1%; }
 .callout[data-callout="col"][data-callout-metadata="2"] { flex: 0 0 2%; }
 .callout[data-callout="col"][data-callout-metadata="3"] { flex: 0 0 3%; }

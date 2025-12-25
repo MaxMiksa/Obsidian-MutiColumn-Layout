@@ -33,17 +33,28 @@
 >> - Pair with the sidebar for focus. Pair with the sidebar for focus. Pair with the sidebar for focus. Pair with the sidebar for focus.
 
 ---
-## 2 Columns (50/50)
+
 > [!multi-column]
 >
 >> [!col]
->> ## Mode F: Three-Column Equal
->> - Default equal widths, no ratios needed.
->> - Great for comparisons or card layouts.  Great for comparisons or card layouts.  Great for comparisons or card layouts.  Great for comparisons or card layouts.
+>> ### Column 1
+>> Content here...
 >
 >> [!col]
->> ## Mode G: Equal Column
->> - Add screenshots or checklists.
+>> ### Column 2
+>> Content there...
+
+### With Dividers (New!)
+
+> [!multi-column|bordered]
+>
+>> [!col]
+>> ### Left Side
+>> This layout has a divider line on the right.
+>
+>> [!col]
+>> ### Right Side
+>> Clean separation between content.
 
 ---
 ## Rich Content Demo (Mixed Media)
