@@ -9,6 +9,10 @@
 
 Multi-Column Layout is an Obsidian plugin that simplifies the creation of side-by-side content using the built-in Callout syntax. It provides a convenient context menu to insert layouts instantly.
 
+<p align="center">
+  <img src="Presentation/image.png" alt="Multi-Column Layout Demo" width="800">
+</p>
+
 ## ✨ Features
 
 | Feature | Description |

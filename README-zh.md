@@ -9,6 +9,10 @@
 
 Multi-Column Layout 是一款 Obsidian 插件，旨在通过简单的 Callout 语法实现优雅的并排内容排版。通过右键菜单，您可以瞬间插入预设的多栏布局。
 
+<p align="center">
+  <img src="Presentation/image.png" alt="Multi-Column Layout Demo" width="800">
+</p>
+
 ## ✨ 功能特性
 
 | 功能 | 描述 |
